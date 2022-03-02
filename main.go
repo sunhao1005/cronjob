@@ -18,7 +18,9 @@ package main
 
 import (
 	"flag"
+	"go.uber.org/zap/zapcore"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -59,6 +61,9 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
 		Development: true,
+		TimeEncoder: func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+			encoder.AppendString(time.Format("2006-01-02 15:04:05"))
+		},
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
