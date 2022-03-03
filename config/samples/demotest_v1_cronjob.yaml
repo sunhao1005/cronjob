@@ -3,4 +3,24 @@ kind: CronJob
 metadata:
   name: cronjob-sample
 spec:
-  # TODO(user): Add fields here
+  selector:
+    matchLabels:
+      app: gin-server
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: gin-server
+      spec:
+        containers:
+          - name: gin-server
+            image: 17719317036/gin-server:v1
+            #imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
+            resources:
+              limits:
+                cpu: "1"
+                memory: 200Mi
+            ports:
+              - containerPort: 9600
+

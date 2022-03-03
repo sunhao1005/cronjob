@@ -29,13 +29,59 @@ type CronJobSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of CronJob. Edit cronjob_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	//Foo string `json:"foo,omitempty"`
+	Selector SelectorInfo `json:"selector"`
+}
+type SelectorInfo struct {
+	MatchLabels MatchLabelsInfo `json:"matchLabels"`
+	Replicas    int64           `json:"replicas"`
+	Template    TemplateInfo    `json:"template"`
+}
+type TemplateInfo struct {
+	Metadata MatchLabelsInfo `json:"metadata"`
+	Spec     SpecInfo        `json:"spec"`
+}
+
+type SpecInfo struct {
+	Containers ContainersInfo `json:"containers"`
+}
+type ContainersInfo struct {
+	Name            string        `json:"name"`
+	Image           string        `json:"image"`
+	ImagePullPolicy string        `json:"imagePullPolicy"`
+	Resources       ResourcesInfo `json:"resources"`
+	Ports           PortsInfo     `json:"ports"`
+}
+
+type ResourcesInfo struct {
+	Limits LimitsInfo `json:"limits"`
+}
+type LimitsInfo struct {
+	Cpu    string `json:"cpu"`
+	Memory string `json:"memory"`
+}
+
+type PortsInfo struct {
+	ContainerPort string `json:"containerPort"`
+}
+
+type MetadataInfo struct {
+	Labels LabelsInfo `json:"labels"`
+}
+type LabelsInfo struct {
+	App string `json:"app"`
+}
+
+type MatchLabelsInfo struct {
+	App string `json:"app"`
 }
 
 // CronJobStatus defines the observed state of CronJob
 type CronJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Replicas int      `json:"replicas"`
+	PodNames []string `json:"podNames"` //这里二次开发加入计数和pod列表
 }
 
 //+kubebuilder:object:root=true

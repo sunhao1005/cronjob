@@ -19,7 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
-
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,8 +48,22 @@ type CronJobReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
+	logger.Info("start reconcile")
 	fmt.Printf("*********| Name %s | Namespace %s | NamespacedName %s |********", req.Name, req.Namespace, req.NamespacedName)
+	jobObject := demotestv1.CronJob{}
+	err := r.Client.Get(ctx, req.NamespacedName, &jobObject)
+	if err != nil {
+		logger.Error(err, "Reconcile", "Get error", req.NamespacedName)
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+	logger.Info("Reconcile", "client info", jobObject)
+
+	//labels.Set{"app":jobObject.Name}
+
 	// TODO(user): your logic here
 
 	return ctrl.Result{}, nil
