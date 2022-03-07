@@ -28,18 +28,12 @@ type CronJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of CronJob. Edit cronjob_types.go to remove/update
-	//Foo string `json:"foo,omitempty"`
-	Selector SelectorInfo `json:"selector"`
+	Selector   SelectorInfo   `json:"selector"`
+	Replicas   int64          `json:"replicas"`
+	Containers ContainersInfo `json:"containers"`
 }
 type SelectorInfo struct {
 	MatchLabels MatchLabelsInfo `json:"matchLabels"`
-	Replicas    int64           `json:"replicas"`
-	Template    TemplateInfo    `json:"template"`
-}
-type TemplateInfo struct {
-	Metadata MatchLabelsInfo `json:"metadata"`
-	Spec     SpecInfo        `json:"spec"`
 }
 
 type SpecInfo struct {

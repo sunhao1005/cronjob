@@ -6,21 +6,16 @@ spec:
   selector:
     matchLabels:
       app: gin-server
-    replicas: 2
-    template:
-      metadata:
-        labels:
-          app: gin-server
-      spec:
-        containers:
-          - name: gin-server
-            image: 17719317036/gin-server:v1
-            imagePullPolicy: IfNotPresent
-            #imagePullPolicy: Always
-            resources:
-              limits:
-                cpu: "1"
-                memory: 200Mi
-            ports:
-              - containerPort: 9600
+  replicas: 1
+  containers:
+    name: gin-server
+    image: 17719317036/gin-server:v1
+    imagePullPolicy: IfNotPresent
+    #imagePullPolicy: Always
+    resources:
+      limits:
+        cpu: "1"
+        memory: 200Mi
+    ports:
+      containerPort: 9600
 
