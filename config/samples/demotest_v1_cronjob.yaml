@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: gin-server
-    replicas: 1
+    replicas: 2
     template:
       metadata:
         labels:
@@ -15,8 +15,8 @@ spec:
         containers:
           - name: gin-server
             image: 17719317036/gin-server:v1
-            #imagePullPolicy: IfNotPresent
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
+            #imagePullPolicy: Always
             resources:
               limits:
                 cpu: "1"
