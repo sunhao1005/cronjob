@@ -17,5 +17,5 @@ spec:
         cpu: "1"
         memory: 200Mi
     ports:
-      containerPort: 9600
+      containerPort: "9600"
 
