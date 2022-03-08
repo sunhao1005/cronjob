@@ -1,7 +1,8 @@
 apiVersion: demotest.daocloud.io/v1
 kind: CronJob
 metadata:
-  name: cronjob-sample
+  #name: cronjob-sample
+  name: gin-server
 spec:
   selector:
     matchLabels:
