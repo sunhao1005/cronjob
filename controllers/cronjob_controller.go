@@ -72,7 +72,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 	logger.Info("Reconcile", "副本", jobObject.Spec.Replicas)
-	logger.Info("Reconcile", "选择器", jobObject.Spec.Containers)
+	logger.Info("Reconcile", "选择器", jobObject.Spec.Selector)
 	logger.Info("Reconcile", "容器", jobObject.Spec.Containers)
 
 	//创建service
@@ -94,7 +94,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 							Name:       jobObject.Name,
 							Port:       21960,
 							TargetPort: intstr.FromInt(9600),
-							Protocol:   "tcp",
+							Protocol:   corev1.ProtocolTCP,
 							NodePort:   31960,
 						},
 					}},
