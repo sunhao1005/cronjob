@@ -114,9 +114,10 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				return ctrl.Result{}, err
 			}
 			logger.Info("Reconcile", "创建service成功", "Create service success")
+		} else {
+			logger.Error(err, "Reconcile", "Get", "service")
+			return ctrl.Result{}, err
 		}
-		logger.Error(err, "Reconcile", "Get", "service")
-		return ctrl.Result{}, err
 	}
 	//创建deployment
 	deployment := &appsv1.Deployment{}
@@ -168,9 +169,10 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				return ctrl.Result{}, err
 			}
 			logger.Info("Reconcile", "创建成功", "deployment")
+		} else {
+			logger.Error(err, "Reconcile", "Get", "Deployment")
+			return ctrl.Result{}, nil
 		}
-		logger.Error(err, "Reconcile", "Get", "Deployment")
-		return ctrl.Result{}, nil
 	}
 	//更新status
 	jobObject.Status.Replicas = 1
