@@ -35,9 +35,47 @@ spec:
           spec:
             description: CronJobSpec defines the desired state of CronJob
             properties:
+              containers:
+                properties:
+                  image:
+                    type: string
+                  imagePullPolicy:
+                    type: string
+                  name:
+                    type: string
+                  ports:
+                    properties:
+                      containerPort:
+                        type: string
+                    required:
+                    - containerPort
+                    type: object
+                  resources:
+                    properties:
+                      limits:
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                        required:
+                        - cpu
+                        - memory
+                        type: object
+                    required:
+                    - limits
+                    type: object
+                required:
+                - image
+                - imagePullPolicy
+                - name
+                - ports
+                - resources
+                type: object
+              replicas:
+                format: int64
+                type: integer
               selector:
-                description: Foo is an example field of CronJob. Edit cronjob_types.go
-                  to remove/update Foo string `json:"foo,omitempty"`
                 properties:
                   matchLabels:
                     properties:
@@ -46,70 +84,12 @@ spec:
                     required:
                     - app
                     type: object
-                  replicas:
-                    format: int64
-                    type: integer
-                  template:
-                    properties:
-                      metadata:
-                        properties:
-                          app:
-                            type: string
-                        required:
-                        - app
-                        type: object
-                      spec:
-                        properties:
-                          containers:
-                            properties:
-                              image:
-                                type: string
-                              imagePullPolicy:
-                                type: string
-                              name:
-                                type: string
-                              ports:
-                                properties:
-                                  containerPort:
-                                    type: string
-                                required:
-                                - containerPort
-                                type: object
-                              resources:
-                                properties:
-                                  limits:
-                                    properties:
-                                      cpu:
-                                        type: string
-                                      memory:
-                                        type: string
-                                    required:
-                                    - cpu
-                                    - memory
-                                    type: object
-                                required:
-                                - limits
-                                type: object
-                            required:
-                            - image
-                            - imagePullPolicy
-                            - name
-                            - ports
-                            - resources
-                            type: object
-                        required:
-                        - containers
-                        type: object
-                    required:
-                    - metadata
-                    - spec
-                    type: object
                 required:
                 - matchLabels
-                - replicas
-                - template
                 type: object
             required:
+            - containers
+            - replicas
             - selector
             type: object
           status:
