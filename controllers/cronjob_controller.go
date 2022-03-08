@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -176,7 +177,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	//更新status
 	jobObject.Status.Replicas = 1
-	/*var joblist v1.JobList
+	var joblist v1.JobList
 	err = r.List(ctx, &joblist, client.InNamespace(req.Namespace))
 	if err != nil {
 		logger.Error(err, "Reconcile", "List", "pod")
@@ -187,7 +188,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		podsName = append(podsName, item.Name)
 	}
 	jobObject.Status.PodNames = podsName
-	logger.Info("Reconcile", "pods信息", joblist)*/
+	logger.Info("Reconcile", "pods信息", joblist)
 
 	err = r.Status().Update(ctx, &jobObject)
 	if err != nil {
