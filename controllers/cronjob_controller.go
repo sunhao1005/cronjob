@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -62,7 +63,7 @@ type CronJobReconciler struct {
 func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("start reconcile")
-	fmt.Printf("*********| Name %s | Namespace %s | NamespacedName %s |********", req.Name, req.Namespace, req.NamespacedName)
+	fmt.Printf("*********| Name %s | Namespace %s | NamespacedName %s |******** \n", req.Name, req.Namespace, req.NamespacedName)
 	jobObject := demotestv1.CronJob{}
 	err := r.Get(ctx, req.NamespacedName, &jobObject)
 	if err != nil {
@@ -78,13 +79,13 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	//创建service
 	service := &corev1.Service{}
-	err = r.Get(ctx, req.NamespacedName, service)
+	err = r.Get(ctx, types.NamespacedName{Name: jobObject.Name + "-svc", Namespace: req.Namespace}, service)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			//构造service对象
 			service = &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      jobObject.Name + "-service",
+					Name:      jobObject.Name + "-svc",
 					Namespace: jobObject.Namespace,
 					Labels:    jobObject.Labels},
 				Spec: corev1.ServiceSpec{
@@ -122,13 +123,13 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	//创建deployment
 	deployment := &appsv1.Deployment{}
-	err = r.Get(ctx, req.NamespacedName, deployment)
+	err = r.Get(ctx, types.NamespacedName{Name: jobObject.Name + "-dep", Namespace: req.Namespace}, deployment)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			//构造deployment对象
 			deployment = &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      jobObject.Name,
+					Name:      jobObject.Name + "-dep",
 					Namespace: jobObject.Namespace,
 					Labels:    jobObject.Labels},
 				Spec: appsv1.DeploymentSpec{
@@ -176,26 +177,28 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 	//更新status
-	jobObject.Status.Replicas = 1
-	var joblist v1.JobList
-	err = r.List(ctx, &joblist, client.InNamespace(req.Namespace))
-	if err != nil {
-		logger.Error(err, "Reconcile", "List", "pod")
-		return ctrl.Result{}, nil
-	}
-	podsName := []string{jobObject.Name}
-	for _, item := range joblist.Items {
-		podsName = append(podsName, item.Name)
-	}
-	jobObject.Status.PodNames = podsName
-	logger.Info("Reconcile", "pods信息", joblist)
+	if jobObject.Status.Replicas == 0 {
+		jobObject.Status.Replicas = 1
+		var joblist v1.JobList
+		err = r.List(ctx, &joblist, client.InNamespace(req.Namespace))
+		if err != nil {
+			logger.Error(err, "Reconcile", "List", "pod")
+			return ctrl.Result{}, nil
+		}
+		podsName := []string{jobObject.Name}
+		for _, item := range joblist.Items {
+			podsName = append(podsName, item.Name)
+		}
+		jobObject.Status.PodNames = podsName
+		logger.Info("Reconcile", "pods信息", joblist)
 
-	err = r.Status().Update(ctx, &jobObject)
-	if err != nil {
-		logger.Error(err, "Reconcile", "Status", "Update")
-		return ctrl.Result{}, err
+		err = r.Status().Update(ctx, &jobObject)
+		if err != nil {
+			logger.Error(err, "Reconcile", "Status", "Update")
+			return ctrl.Result{}, err
+		}
+		logger.Info("Reconcile", "状态更新完成", jobObject.Status)
 	}
-	logger.Info("Reconcile", "状态更新完成", jobObject.Status)
 	return ctrl.Result{}, nil
 }
 
