@@ -147,7 +147,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 									//Requests: corev1.ResourceList{},
 									Limits: corev1.ResourceList{
 										"cpu":    resource.MustParse(jobObject.Spec.Containers.Resources.Limits.Cpu),
-										"memory": resource.MustParse(jobObject.Spec.Containers.Resources.Limits.Cpu)},
+										"memory": resource.MustParse(jobObject.Spec.Containers.Resources.Limits.Memory)},
 								},
 							}},
 						},
