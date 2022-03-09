@@ -183,7 +183,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		logger.Error(err, "Reconcile", "List", "pod")
 		return ctrl.Result{}, nil
 	}
-	var podsName []string
+	podsName := []string{jobObject.Name}
 	for _, item := range joblist.Items {
 		podsName = append(podsName, item.Name)
 	}
