@@ -178,7 +178,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	//更新status
 	if jobObject.Status.Replicas == 0 {
-		jobObject.Status.Replicas = 1
+		jobObject.Status.Replicas = int(jobObject.Spec.Replicas)
 		var joblist v1.JobList
 		err = r.List(ctx, &joblist, client.InNamespace(req.Namespace))
 		if err != nil {
