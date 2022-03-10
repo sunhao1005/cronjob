@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -101,7 +102,13 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 						},
 					}},
 			}
-			logger.Info("Reconcile", "构造service成功", service)
+			toString, err := jsoniter.MarshalToString(service)
+			if err != nil {
+				logger.Error(err, "MarshalToString")
+				return ctrl.Result{}, err
+			}
+
+			logger.Info("Reconcile", "构造service成功", toString)
 			//建立关联
 			err = controllerutil.SetControllerReference(&jobObject, service, r.Scheme)
 			if err != nil {
@@ -154,7 +161,12 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 					},
 				},
 			}
-			logger.Info("Reconcile", "构造deployment成功", deployment)
+			toString, err := jsoniter.MarshalToString(deployment)
+			if err != nil {
+				logger.Error(err, "MarshalToString")
+				return ctrl.Result{}, err
+			}
+			logger.Info("Reconcile", "构造deployment成功", toString)
 			//建立关联
 			//create deployment
 			//建立关联

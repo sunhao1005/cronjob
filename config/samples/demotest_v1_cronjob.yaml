@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: gin-server
-  replicas: 1
+  replicas: 3
   containers:
     name: gin-server
     image: 17719317036/gin-server:v1
