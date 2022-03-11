@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -39,26 +40,35 @@ func (r *CronJob) SetupWebhookWithManager(mgr ctrl.Manager) error {
 var _ webhook.Defaulter = &CronJob{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
+//设置默认配置
 func (r *CronJob) Default() {
 	cronjoblog.Info("default", "name", r.Name)
-
 	// TODO(user): fill in your defaulting logic.
+	if r.Spec.Replicas < 1 {
+		r.Spec.Replicas = 1
+	}
+	cronjoblog.Info("default", "Replicas", r.Spec.Replicas)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-demotest-daocloud-io-v1-cronjob,mutating=false,failurePolicy=fail,sideEffects=None,groups=demotest.daocloud.io,resources=cronjobs,verbs=create;update,versions=v1,name=vcronjob.kb.io,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/validate-demotest-daocloud-io-v1-cronjob,mutating=false,failurePolicy=fail,sideEffects=None,groups=demotest.daocloud.io,resources=cronjobs,verbs=create;update;delete,versions=v1,name=vcronjob.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Validator = &CronJob{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+//创建配置
 func (r *CronJob) ValidateCreate() error {
 	cronjoblog.Info("validate create", "name", r.Name)
-
+	if r.Spec.Replicas > 3 {
+		cronjoblog.Error(errors.New("replicas is too large"), "replicas", r.Spec.Replicas)
+		return errors.New("replicas is too large")
+	}
 	// TODO(user): fill in your validation logic upon object creation.
 	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+//更新配置
 func (r *CronJob) ValidateUpdate(old runtime.Object) error {
 	cronjoblog.Info("validate update", "name", r.Name)
 
@@ -67,6 +77,7 @@ func (r *CronJob) ValidateUpdate(old runtime.Object) error {
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+//删除配置
 func (r *CronJob) ValidateDelete() error {
 	cronjoblog.Info("validate delete", "name", r.Name)
 
