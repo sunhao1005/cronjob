@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: cronjob-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-manager
+  namespace: cronjob-system
+  labels:
+    control-plane: controller-manager
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+      - command:
+        - /webhook-server
+        args:
+        - --leader-elect
+        image: 17719317036/webhook:latest
+        name: cronjob-webhook
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # TODO(user): Configure the resources accordingly based on the project requirements.
+        # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          Liveness: http-get http://:8081/healthz delay=15s timeout=1s period=20s #success=1 #failure=3
+          Readiness: http-get http://:8081/readyz delay=5s timeout=1s period=10s #success=1 #failure=3
+          Environment: <none>
+          Mounts:
+              /tmp/k8s-webhook-server/serving-certs from cert (ro)
+      Volumes:
+        cert:
+          Type: Secret
+          SecretName: webhook-server-cert
+          Optional: false
+      serviceAccountName: cronjob-controller-manager
+      terminationGracePeriodSeconds: 10

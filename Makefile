@@ -1,6 +1,8 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= 17719317036/cronjob:latest
+IMG-WEBHOOK ?= 17719317036/webhook:latest
+
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.23
 
@@ -76,6 +78,27 @@ docker-build: test ## Build docker image with the manager.
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
+
+
+#######################################
+.PHONY: docker-webhook-build
+docker-webhook-build: test ## Build docker image with the webhook.
+	docker build -f ./webhook/Dockerfile -t ${IMG-WEBHOOK} .
+
+.PHONY: docker-webhook-push
+docker-webhook-push: ## Push docker image with the webhook.
+	docker push ${IMG-WEBHOOK}
+
+.PHONY: webhook-deploy
+deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/webhook-manager/manager && $(KUSTOMIZE) edit set image controller=${IMG-WEBHOOK}
+	$(KUSTOMIZE) build config/webhook-manager/default | kubectl apply -f -
+
+.PHONY: webhook-undeploy
+undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
+#######################################
 
 ##@ Deployment
 

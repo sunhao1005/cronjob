@@ -1,0 +1,69 @@
+Name:                   cronjob-controller-manager
+Namespace:              cronjob-system
+CreationTimestamp:      Thu, 12 May 2022 09:47:04 -0400
+Labels:                 control-plane=controller-manager
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               control-plane=controller-manager
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           control-plane=controller-manager
+  Annotations:      kubectl.kubernetes.io/default-container: manager
+  Service Account:  cronjob-controller-manager
+  Containers:
+    kube-rbac-proxy:
+      Image:      bitnami/kube-rbac-proxy:latest
+      Port:       8443/TCP
+      Host Port:  0/TCP
+      Args:
+        --secure-listen-address=0.0.0.0:8443
+        --upstream=http://127.0.0.1:8080/
+        --logtostderr=true
+        --v=0
+      Limits:
+        cpu:     500m
+        memory:  128Mi
+      Requests:
+        cpu:        5m
+        memory:     64Mi
+      Environment:  <none>
+      Mounts:       <none>
+    manager:
+      Image:      17719317036/cronjob:latest
+      Port:       9443/TCP
+      Host Port:  0/TCP
+      Command:
+        /manager
+      Args:
+        --health-probe-bind-address=:8081
+        --metrics-bind-address=127.0.0.1:8080
+        --leader-elect
+      Limits:
+        cpu:     500m
+        memory:  128Mi
+      Requests:
+        cpu:        10m
+        memory:     64Mi
+      Liveness:     http-get http://:8081/healthz delay=15s timeout=1s period=20s #success=1 #failure=3
+      Readiness:    http-get http://:8081/readyz delay=5s timeout=1s period=10s #success=1 #failure=3
+      Environment:  <none>
+      Mounts:
+        /tmp/k8s-webhook-server/serving-certs from cert (ro)
+  Volumes:
+    cert:
+      Type:        Secret (a volume populated by a Secret)
+      SecretName:  webhook-server-cert
+      Optional:    false
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   cronjob-controller-manager-6bf878db7d (1/1 replicas created)
+Events:
+  Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  4m33s  deployment-controller  Scaled up replica set cronjob-controller-manager-6bf878db7d to 1

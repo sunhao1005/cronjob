@@ -1,0 +1,19 @@
+domain: daocloud.io
+layout:
+- go.kubebuilder.io/v3
+projectName: webhook
+repo: cronjob
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: daocloud.io
+  group: demotest
+  kind: CronJob
+  path: cronjob/api/v1
+  version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+version: "3"
